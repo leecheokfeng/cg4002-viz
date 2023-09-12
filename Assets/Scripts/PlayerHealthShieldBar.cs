@@ -12,21 +12,44 @@ public class PlayerHealthShieldBar : MonoBehaviour
     public Image shieldBar;
     public Image[] shieldUnits;
 
+    public ShieldInventory shieldInventory;
+
     float health = 100;
-    float maxHealth = 100;
+    float MAX_HEALTH = 100;
     float shield = 0;
-    float maxShield = 30;
+    float MAX_SHIELD_HP = 30;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        health = maxHealth;
+        health = MAX_HEALTH;
         shield = 0;
     }
 
     // Update is called once per frame
     void Update()
+    {
+        CheckKeyboardInput();
+
+        // Display HP text
+        healthText.text = health.ToString();
+
+        // Display HP units
+        for (int i = 0; i < healthUnits.Length; i++)
+        {
+            healthUnits[i].enabled = IsHealthUnitDisplayed(health, i);
+        }
+
+        // Display SHIELD units
+        for (int i = 0; i < shieldUnits.Length; i++)
+        {
+            shieldUnits[i].enabled = IsHealthUnitDisplayed(shield, i);
+        }
+    }
+
+    // Checks for keyboard inputs (for debugging on computer)
+    void CheckKeyboardInput()
     {
         // Take 10 damage
         if (Input.GetKeyDown(KeyCode.Z))
@@ -44,21 +67,6 @@ public class PlayerHealthShieldBar : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C))
         {
             ActivateShield();
-        }
-
-        // Display HP text
-        healthText.text = health.ToString();
-
-        // Display HP units
-        for (int i = 0; i < healthUnits.Length; i++)
-        {
-            healthUnits[i].enabled = IsHealthUnitDisplayed(health, i);
-        }
-
-        // Display SHIELD units
-        for (int i = 0; i < shieldUnits.Length; i++)
-        {
-            shieldUnits[i].enabled = IsHealthUnitDisplayed(shield, i);
         }
     }
 
@@ -85,9 +93,10 @@ public class PlayerHealthShieldBar : MonoBehaviour
 
     public void ActivateShield() 
     { 
-        if (shield == 0)
+        if (shield == 0 && shieldInventory.GetShieldsLeft() > 0)
         {
-            shield = maxShield;
+            shield = MAX_SHIELD_HP;
+            shieldInventory.ReduceShield();
         }
     }
 }
