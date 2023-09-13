@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 848409ee8ba454f42a5ddff137688a27, type: 3}
+  m_Name: TrackedReferenceImages
+  m_EditorClassIdentifier: 
+  m_GuidLow: 0
+  m_GuidHigh: 0
+  m_DataStore:
+    m_Storage: []
+  m_Images:
+  - m_SerializedGuid:
+      m_GuidLow: 5292523624743751162
+      m_GuidHigh: 11546288419787589534
+    m_SerializedTextureGuid:
+      m_GuidLow: 4955351162005646713
+      m_GuidHigh: 12222796966316254010
+    m_Size: {x: 0, y: 0}
+    m_SpecifySize: 0
+    m_Name: CG4002-GROUP8-2023
+    m_Texture: {fileID: 0}
