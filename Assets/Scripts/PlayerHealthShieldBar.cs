@@ -14,17 +14,17 @@ public class PlayerHealthShieldBar : MonoBehaviour
 
     public ShieldInventory shieldInventory;
 
-    float health = 100;
-    float MAX_HEALTH = 100;
-    float shield = 0;
-    float MAX_SHIELD_HP = 30;
+    int health = 100;
+    int MAX_HEALTH = 100;
+    int shieldHp = 0;
+    int MAX_SHIELD_HP = 30;
 
 
     // Start is called before the first frame update
     void Start()
     {
         health = MAX_HEALTH;
-        shield = 0;
+        shieldHp = 0;
     }
 
     // Update is called once per frame
@@ -44,7 +44,7 @@ public class PlayerHealthShieldBar : MonoBehaviour
         // Display SHIELD units
         for (int i = 0; i < shieldUnits.Length; i++)
         {
-            shieldUnits[i].enabled = IsHealthUnitDisplayed(shield, i);
+            shieldUnits[i].enabled = IsHealthUnitDisplayed(shieldHp, i);
         }
     }
 
@@ -71,7 +71,7 @@ public class PlayerHealthShieldBar : MonoBehaviour
     }
 
     // Return TRUE if HP/SHIELD unit should be displayed, else return FALSE
-    bool IsHealthUnitDisplayed(float health, int unitIndex)
+    bool IsHealthUnitDisplayed(int health, int unitIndex)
     {
         return (unitIndex * 10) < health;
     }
@@ -80,9 +80,9 @@ public class PlayerHealthShieldBar : MonoBehaviour
     {
         for (int i = 0; i < damage/10; i++)
         {
-            if (shield > 0)
+            if (shieldHp > 0)
             {
-                shield -= 10;
+                shieldHp -= 10;
             }
             else if (health > 0)
             {
@@ -93,9 +93,9 @@ public class PlayerHealthShieldBar : MonoBehaviour
 
     public void ActivateShield() 
     { 
-        if (shield == 0 && shieldInventory.GetShieldsLeft() > 0)
+        if (shieldHp == 0 && shieldInventory.GetShieldsLeft() > 0)
         {
-            shield = MAX_SHIELD_HP;
+            shieldHp = MAX_SHIELD_HP;
             shieldInventory.ReduceShield();
         }
     }
