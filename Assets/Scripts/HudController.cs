@@ -253,7 +253,7 @@ public class HudController : MonoBehaviour
     // Display Player Identifier text
     void DisplayPlayerIdentifierText(int player)
     {
-        playerIdentifierText.text = "P" + player.ToString() + " (You)";
+        playerIdentifierText.text = "PLAYER " + player.ToString();
     }
 
     // Return TRUE if HP/SHIELD unit should be displayed, else return FALSE
