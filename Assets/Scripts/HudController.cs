@@ -29,12 +29,17 @@ public class HudController : MonoBehaviour
     public TMP_Text playerIdentifierText;
 
     public Image selfShieldOverlay;
+    public GameObject opponentShieldPrefab;
+    private GameObject opponentShieldObject;
 
     private ARTrackedImageManager trackedImageManager;
 
     private ARTrackedImage arTrackedImage;
 
     public TMP_Text debugText;
+
+    private bool isOpponentDetected = false;
+    private Vector3 opponentPosition;
 
     private int[] health = { 100, 100 };
     private int[] shieldHp = { 0, 0 };
@@ -82,21 +87,6 @@ public class HudController : MonoBehaviour
         {
             // Set trackedImage
             arTrackedImage = trackedImage;
-
-            if (trackedImage.trackingState == TrackingState.Tracking)
-            {
-                // trackedImage is tracked
-                Debug.Log("image is tracking");
-                // Debugging purposes
-                DisplayDebugText("image is tracking");
-            }
-            else
-            {
-                // trackedImage is lost
-                Debug.Log("image is lost");
-                // Debugging purposes
-                DisplayDebugText("image is lost");
-            }
             break;
         }
     }
@@ -136,16 +126,51 @@ public class HudController : MonoBehaviour
         ////
 
         // Opponent detection
+        DetectOpponent();
+
+        // Display opponent's shield object
+        HandleOpponentShieldObject(OPPONENT);
+    }
+
+    // Handles rendering of opponent's shield object
+    void HandleOpponentShieldObject(int opponent)
+    {
+        int opponentIndex = (opponent == 1) ? 0 : 1;
+        if (isOpponentDetected == true && shieldHp[opponentIndex] > 0)
+        {
+            opponentShieldObject.SetActive(true);
+            opponentShieldObject.transform.position = opponentPosition;
+
+        }
+        else
+        {
+            opponentShieldObject.SetActive(false);
+        }
+    }
+
+    // Checks if opponent is on camera
+    // Sets isOpponentDetected to TRUE/FALSE accordingly
+    // Instantiate opponent's shield object if it doesn't already exist
+    void DetectOpponent()
+    {
         if (arTrackedImage != null)
         {
-            DisplayDebugText(arTrackedImage.trackingState.ToString());
+            opponentPosition = arTrackedImage.transform.position;
             if (arTrackedImage.trackingState == TrackingState.Tracking)
             {
-                DisplayDebugText("image detected!!");
+                DisplayDebugText("image detected!! " + opponentPosition.ToString());
+                isOpponentDetected = true;
+
+                if (opponentShieldObject == null)
+                {
+                    // Instantiate at opponent position and (0, 180, 0) rotation.
+                    opponentShieldObject = Instantiate(opponentShieldPrefab, opponentPosition, Quaternion.AngleAxis(180, Vector3.up));
+                }
             }
             else
             {
-                DisplayDebugText("image not found");
+                DisplayDebugText("image not found " + opponentPosition.ToString());
+                isOpponentDetected = false;
             }
         }
     }

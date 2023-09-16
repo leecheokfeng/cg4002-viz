@@ -28,4 +28,4 @@ MonoBehaviour:
     m_Size: {x: 0, y: 0}
     m_SpecifySize: 0
     m_Name: CG4002-GROUP8-2023
-    m_Texture: {fileID: 0}
+    m_Texture: {fileID: 2800000, guid: 94aa6d79f1a044c43aa300eb1419a0a9, type: 3}

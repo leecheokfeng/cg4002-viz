@@ -825,6 +825,7 @@ MonoBehaviour:
   deathsText: {fileID: 1269935955}
   playerIdentifierText: {fileID: 1697492850}
   selfShieldOverlay: {fileID: 1271748734}
+  opponentShieldPrefab: {fileID: 4591258013022080226, guid: dee1e804a5735974fac8f8b909652967, type: 3}
   debugText: {fileID: 972572133}
 --- !u!114 &40919626
 MonoBehaviour:
