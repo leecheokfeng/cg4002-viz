@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR;
+using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems;
 
 public class HudController : MonoBehaviour
 {
@@ -26,6 +29,12 @@ public class HudController : MonoBehaviour
     public TMP_Text playerIdentifierText;
 
     public Image selfShieldOverlay;
+
+    private ARTrackedImageManager trackedImageManager;
+
+    private ARTrackedImage arTrackedImage;
+
+    public TMP_Text debugText;
 
     private int[] health = { 100, 100 };
     private int[] shieldHp = { 0, 0 };
@@ -50,6 +59,47 @@ public class HudController : MonoBehaviour
     // Change these to view POV of each player's screen
     private int PLAYER = 1;
     private int OPPONENT = 2;
+
+    // Tracking Opponent
+    private void Awake()
+    {
+        trackedImageManager = FindObjectOfType<ARTrackedImageManager>();
+    }
+
+    public void OnEnable()
+    {
+        trackedImageManager.trackedImagesChanged += OnTrackedImagesChanged;
+    }
+
+    public void OnDisable()
+    {
+        trackedImageManager.trackedImagesChanged -= OnTrackedImagesChanged;
+    }
+
+    void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs eventArgs)
+    {
+        foreach (ARTrackedImage trackedImage in eventArgs.added)
+        {
+            // Set trackedImage
+            arTrackedImage = trackedImage;
+
+            if (trackedImage.trackingState == TrackingState.Tracking)
+            {
+                // trackedImage is tracked
+                Debug.Log("image is tracking");
+                // Debugging purposes
+                DisplayDebugText("image is tracking");
+            }
+            else
+            {
+                // trackedImage is lost
+                Debug.Log("image is lost");
+                // Debugging purposes
+                DisplayDebugText("image is lost");
+            }
+            break;
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -84,6 +134,20 @@ public class HudController : MonoBehaviour
         DisplaySelfShieldOverlay(PLAYER);
         // Display AR shield for opponent when ShieldHp[1] > 0
         ////
+
+        // Opponent detection
+        if (arTrackedImage != null)
+        {
+            DisplayDebugText(arTrackedImage.trackingState.ToString());
+            if (arTrackedImage.trackingState == TrackingState.Tracking)
+            {
+                DisplayDebugText("image detected!!");
+            }
+            else
+            {
+                DisplayDebugText("image not found");
+            }
+        }
     }
 
     // Display self shield overlay
@@ -231,5 +295,11 @@ public class HudController : MonoBehaviour
         ammoLeft[1] = p2_state[3];
         grenadesLeft[1] = p2_state[4];
         deaths[1] = p2_state[5];
+    }
+
+    // Debugging purposes
+    void DisplayDebugText(string msg)
+    {
+        debugText.text = msg;
     }
 }
