@@ -4,36 +4,28 @@ using UnityEngine;
 
 public class GameEngine : MonoBehaviour
 {
-    int MAX_HEALTH = 100;
-    int MAX_SHIELD_HP = 30;
-    int MAX_SHIELDS = 3;
-    int MAX_AMMO = 6;
-    int MAX_GRENADES = 2;
+    private int MAX_HEALTH = 100;
+    private int MAX_SHIELD_HP = 30;
+    private int MAX_SHIELDS = 3;
+    private int MAX_AMMO = 6;
+    private int MAX_GRENADES = 2;
 
-    int[] health = { 100, 100 };
-    int[] shieldHp = { 0, 0 };
-    int[] shieldsLeft = { 3, 3 };
-    int[] ammoLeft = { 6, 6 };
-    int[] grenadesLeft = { 2, 2 };
-    int[] deaths = { 0, 0 };
+    private int[] health = { 100, 100 };
+    private int[] shieldHp = { 0, 0 };
+    private int[] shieldsLeft = { 3, 3 };
+    private int[] ammoLeft = { 6, 6 };
+    private int[] grenadesLeft = { 2, 2 };
+    private int[] deaths = { 0, 0 };
 
     public HudController hudController;
 
-    //int p1_health = 100;
-    //int p1_shieldHp = 0;
-    //int p1_shieldsLeft = 3;
-    //int p1_ammoLeft = 6;
-    //int p1_grenadesLeft = 2;
+    private bool isOpponentDetected = false;
 
-    //int p2_health = 100;
-    //int p2_shieldHp = 0;
-    //int p2_shieldsLeft = 3;
-    //int p2_ammoLeft = 6;
-    //int p2_grenadesLeft = 2;
-
-    //int p1_deaths = 0;
-    //int p2_deaths = 0;
-
+    // Action names
+    private string SHOOT = "shoot";
+    private string RELOAD = "reload";
+    private string SHIELD = "shield";
+    private string GRENADE = "grenade";
 
 
     // Start is called before the first frame update
@@ -61,6 +53,9 @@ public class GameEngine : MonoBehaviour
         
     }
 
+    // Handle all actions for player 1.
+    // 2 functions for action handling for both players cos unity buttons can't
+    // link to functions with 2 parameters.
     public void HandleActionPlayer1(string action)
     {
         int player = 1;
@@ -71,14 +66,83 @@ public class GameEngine : MonoBehaviour
             return; 
         }
 
-        // Valid damage actions
+        // Marvel damage actions
+
+        // Grenade
+        if (action == GRENADE)
+        {
+            // Send action to visualiser
+            SendActionToVisualiser(action);
+            // Visualiser determines hit/miss and replies
+            // Update game state accordingly
+            HandleGrenade(player);
+            SendGameStateToVisualiser();
+        }
 
         // Valid reload
+        if (action == RELOAD)
+        {
+            HandleReload(player);
+            SendActionToVisualiser(action);
+            SendGameStateToVisualiser();
+        }
 
         // Valid shield
+        if (action == SHIELD)
+        {
+            ActivateShield(player);
+            SendGameStateToVisualiser();
+        }
 
         // Valid shoot
-        if (action == "shoot")
+        if (action == SHOOT)
+        {
+            HandleShoot(player);
+            SendActionToVisualiser(action);
+            SendGameStateToVisualiser();
+        }
+
+        // Valid logout
+    }
+
+    // Handle all actions for player 2.
+    public void HandleActionPlayer2(string action)
+    {
+        int player = 2;
+
+        // Invalid/unrecognisable action
+        if (isActionValid(action, player) == false)
+        {
+            return;
+        }
+
+        // Marvel damage actions
+
+        // Grenade
+        if (action == GRENADE)
+        {
+            SendActionToVisualiser(action);
+            HandleGrenade(player);
+            SendGameStateToVisualiser();
+        }
+
+        // Valid reload
+        if (action == RELOAD)
+        {
+            HandleReload(player);
+            SendActionToVisualiser(action);
+            SendGameStateToVisualiser();
+        }
+
+        // Valid shield
+        if (action == SHIELD)
+        {
+            ActivateShield(player);
+            SendGameStateToVisualiser();
+        }
+
+        // Valid shoot
+        if (action == SHOOT)
         {
             HandleShoot(player);
             SendActionToVisualiser(action);
@@ -93,7 +157,12 @@ public class GameEngine : MonoBehaviour
     // Receive hit/miss for actions that require it
     void SendActionToVisualiser(string action)
     {
-        hudController.HandleActionFromGameEngine(action);
+        int response = hudController.HandleActionFromGameEngine(action);
+        // Actions that require tracking
+        if (action == GRENADE)
+        {
+            isOpponentDetected = (response == 1) ? true : false;
+        }
     }
 
     // Update the game state of the visualiser
@@ -104,6 +173,35 @@ public class GameEngine : MonoBehaviour
         int[] p2_state = { health[1], shieldHp[1], shieldsLeft[1], ammoLeft[1], grenadesLeft[1], deaths[1] };
         hudController.ChangeGameState(p1_state, p2_state);
     }
+
+    // Grenade thrown
+    void HandleGrenade(int player)
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        grenadesLeft[playerIndex] -= 1;
+
+        if (isOpponentDetected == true)
+        {
+            int damagedPlayer = (player == 1) ? 2 : 1;
+            TakeDamage(damagedPlayer, 30);
+        }
+    }
+
+    // Activate Shield
+    void ActivateShield(int player)
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        shieldHp[playerIndex] = MAX_SHIELD_HP;
+        shieldsLeft[playerIndex] -= 1;
+    }
+
+    // Reload
+    void HandleReload(int player) 
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        ammoLeft[playerIndex] = MAX_AMMO;
+    }
+
 
     // Assume shoot and hit
     // HandleShoot(1) means p1 shot p2 and hit
@@ -125,12 +223,6 @@ public class GameEngine : MonoBehaviour
 
         for (int i = 0; i < damage / 10; i++)
         {
-            if (health[playerIndex] == 0)
-            {
-                RevivePlayer(player);
-                return;
-            }
-
             if (shieldHp[playerIndex] > 0)
             {
                 shieldHp[playerIndex] -= 10;
@@ -138,6 +230,12 @@ public class GameEngine : MonoBehaviour
             else if (health[playerIndex] > 0)
             {
                 health[playerIndex] -= 10;
+            }
+
+            if (health[playerIndex] == 0)
+            {
+                RevivePlayer(player);
+                return;
             }
         }
     }
@@ -160,14 +258,14 @@ public class GameEngine : MonoBehaviour
     {
         int playerIndex = (player == 1) ? 0 : 1;
 
-        if (action == "grenade")
+        if (action == GRENADE)
         { return grenadesLeft[playerIndex] > 0; }
-        else if (action == "shield")
+        else if (action == SHIELD)
         { return shieldsLeft[playerIndex] > 0 && shieldHp[playerIndex] == 0; }
-        else if (action == "reload")
+        else if (action == RELOAD)
         { return ammoLeft[playerIndex] == 0; }
-        else if (action == "shoot")
+        else if (action == SHOOT)
         { return ammoLeft[playerIndex] > 0; }
-        else { return false; }  
+        else { return true; }  
     }
 }

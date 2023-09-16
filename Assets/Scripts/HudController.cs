@@ -21,6 +21,12 @@ public class HudController : MonoBehaviour
 
     public TMP_Text grenadeText;
 
+    public TMP_Text killsText;
+    public TMP_Text deathsText;
+    public TMP_Text playerIdentifierText;
+
+    public Image selfShieldOverlay;
+
     private int[] health = { 100, 100 };
     private int[] shieldHp = { 0, 0 };
     private int[] shieldsLeft = { 3, 3 };
@@ -28,18 +34,27 @@ public class HudController : MonoBehaviour
     private int[] grenadesLeft = { 2, 2 };
     private int[] deaths = { 0, 0 };
 
-    string RESERVE_AMMO = "--";
+    private int MAX_SHIELDS = 3;
+    private int MAX_GRENADES = 2;
+    private string RESERVE_AMMO = "--";
 
     string action = "";
 
+    // Action names
+    private string SHOOT = "shoot";
+    private string RELOAD = "reload";
+    private string SHIELD = "shield";
+    private string GRENADE = "grenade";
+
     // For now, we are always player 1, opponent is player 2
-    int PLAYER = 1;
-    int OPPONENT = 2;
+    // Change these to view POV of each player's screen
+    private int PLAYER = 1;
+    private int OPPONENT = 2;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        DisplayPlayerIdentifierText(PLAYER);
     }
 
     // Update is called once per frame
@@ -54,8 +69,42 @@ public class HudController : MonoBehaviour
         // Display Opponent HP
         DisplayOppHp(OPPONENT);
 
+        // Display Kills/Deaths
+        DisplayScore(PLAYER);
+
         // Display ammo count text
         DisplayAmmoCountText(PLAYER);
+        // Display shield count text
+        DisplayShieldCountText(PLAYER);
+        // Display shield count text
+        DisplayGrenadeCountText(PLAYER);
+
+
+        // Display AR shield for player when shieldHp[0] > 0
+        DisplaySelfShieldOverlay(PLAYER);
+        // Display AR shield for opponent when ShieldHp[1] > 0
+        ////
+    }
+
+    // Display self shield overlay
+    void DisplaySelfShieldOverlay(int player)
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        selfShieldOverlay.enabled = shieldHp[playerIndex] > 0;
+    }
+
+    // Display shield count text
+    void DisplayGrenadeCountText(int player)
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        grenadeText.text = grenadesLeft[playerIndex].ToString() + " / " + MAX_GRENADES.ToString();
+    }
+
+    // Display shield count text
+    void DisplayShieldCountText(int player)
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        shieldText.text = shieldsLeft[playerIndex].ToString() + " / " + MAX_SHIELDS.ToString();
     }
 
     // Display ammo count text
@@ -63,6 +112,16 @@ public class HudController : MonoBehaviour
     {
         int playerIndex = (player == 1) ? 0 : 1;
         ammoText.text = ammoLeft[playerIndex].ToString() + " / " + RESERVE_AMMO.ToString();
+    }
+
+    // Display Kills/Deaths of player
+    // Player's kills = opponent's deaths and vice versa
+    void DisplayScore(int player)
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        int opponentIndex = (player == 1) ? 1 : 0;
+        killsText.text = deaths[opponentIndex].ToString();
+        deathsText.text = deaths[playerIndex].ToString();
     }
 
     // Display Opponent HP
@@ -102,6 +161,12 @@ public class HudController : MonoBehaviour
         healthText.text = health[playerIndex].ToString();
     }
 
+    // Display Player Identifier text
+    void DisplayPlayerIdentifierText(int player)
+    {
+        playerIdentifierText.text = "P" + player.ToString() + " (You)";
+    }
+
     // Return TRUE if HP/SHIELD unit should be displayed, else return FALSE
     bool IsHealthUnitDisplayed(int health, int unitIndex)
     {
@@ -110,22 +175,43 @@ public class HudController : MonoBehaviour
 
     // Display action sent by game engine
     // Eg. "shoot" has firing and hitting of bullet effect
+    // Shield not included as it has to remain on screen until shieldHp == 0
     public void DisplayAction(string action)
     {
         // Display action for 5 seconds and stop
+        // PLACEHOLDER
         Debug.Log("displaying action...");
+
+        // AR Effect for shoot
+
+        // AR Effect for reload
+
+
     }
 
     // Game Engine calls this function to send action to visualiser
     // Handle what happens on visualiser for each action
     // Return hit/miss to game engine for actions that require it
-    public void HandleActionFromGameEngine(string action)
+    // Hit = 1, miss = 0
+    public int HandleActionFromGameEngine(string action)
     {
         this.action = action;
 
-        if (action == "shoot")
+        // Actions that require tracking
+        if (action == GRENADE)
+        {
+            // If opponent detected, return hit, display grenade flying to opp
+            // Else, return miss, display grenade flying straight
+
+            // Return hit/miss
+            return 1;
+        }
+
+        // Other actions (shoot, reload)
+        else
         {
             DisplayAction(action);
+            return 0;
         }
     }
 
