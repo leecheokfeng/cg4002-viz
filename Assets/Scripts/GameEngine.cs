@@ -19,7 +19,9 @@ public class GameEngine : MonoBehaviour
 
     public HudController hudController;
 
-    private bool isOpponentDetected = false;
+    // isOpponentDetected[0] = true -> p1 sees p2
+    // isOpponentDetected[1] = true -> p2 sees p1
+    private bool[] isOpponentDetected = { false, false };
 
     // Action names
     private string SHOOT = "shoot";
@@ -59,6 +61,7 @@ public class GameEngine : MonoBehaviour
     public void HandleActionPlayer1(string action)
     {
         int player = 1;
+        int playerIndex = (player == 1) ? 0 : 1;
 
         // Invalid/unrecognisable action
         if (isActionValid(action, player) == false) 
@@ -72,18 +75,20 @@ public class GameEngine : MonoBehaviour
         if (action == GRENADE)
         {
             // Send action to visualiser
-            SendActionToVisualiser(action);
+            SendActionToVisualiser(action, player);
             // Visualiser determines hit/miss and replies
             // Update game state accordingly
             HandleGrenade(player);
             SendGameStateToVisualiser();
+            // Reset opponent detection
+            isOpponentDetected[playerIndex] = false;
         }
 
         // Valid reload
         if (action == RELOAD)
         {
             HandleReload(player);
-            SendActionToVisualiser(action);
+            SendActionToVisualiser(action, player);
             SendGameStateToVisualiser();
         }
 
@@ -98,7 +103,7 @@ public class GameEngine : MonoBehaviour
         if (action == SHOOT)
         {
             HandleShoot(player);
-            SendActionToVisualiser(action);
+            SendActionToVisualiser(action, player);
             SendGameStateToVisualiser();
         }
 
@@ -109,6 +114,7 @@ public class GameEngine : MonoBehaviour
     public void HandleActionPlayer2(string action)
     {
         int player = 2;
+        int playerIndex = (player == 1) ? 0 : 1;
 
         // Invalid/unrecognisable action
         if (isActionValid(action, player) == false)
@@ -121,16 +127,18 @@ public class GameEngine : MonoBehaviour
         // Grenade
         if (action == GRENADE)
         {
-            SendActionToVisualiser(action);
+            SendActionToVisualiser(action, player);
             HandleGrenade(player);
             SendGameStateToVisualiser();
+            // Reset opponent detection
+            isOpponentDetected[playerIndex] = false;
         }
 
         // Valid reload
         if (action == RELOAD)
         {
             HandleReload(player);
-            SendActionToVisualiser(action);
+            SendActionToVisualiser(action, player);
             SendGameStateToVisualiser();
         }
 
@@ -145,7 +153,7 @@ public class GameEngine : MonoBehaviour
         if (action == SHOOT)
         {
             HandleShoot(player);
-            SendActionToVisualiser(action);
+            SendActionToVisualiser(action, player);
             SendGameStateToVisualiser();
         }
 
@@ -155,13 +163,21 @@ public class GameEngine : MonoBehaviour
 
     // Send action to visualiser
     // Receive hit/miss for actions that require it
-    void SendActionToVisualiser(string action)
+    void SendActionToVisualiser(string action, int player)
     {
-        int response = hudController.HandleActionFromGameEngine(action);
+        int playerIndex = (player == 1) ? 0 : 1;
+        // Get response from visualiser based on which player made the action
+        int response = hudController.HandleActionFromGameEngine(action, player);
+        
+        if (response == -1)
+        {
+            return;
+        }
+
         // Actions that require tracking
         if (action == GRENADE)
         {
-            isOpponentDetected = (response == 1) ? true : false;
+            isOpponentDetected[playerIndex] = (response == 1) ? true : false;
         }
     }
 
@@ -180,7 +196,7 @@ public class GameEngine : MonoBehaviour
         int playerIndex = (player == 1) ? 0 : 1;
         grenadesLeft[playerIndex] -= 1;
 
-        if (isOpponentDetected == true)
+        if (isOpponentDetected[playerIndex] == true)
         {
             int damagedPlayer = (player == 1) ? 2 : 1;
             TakeDamage(damagedPlayer, 30);

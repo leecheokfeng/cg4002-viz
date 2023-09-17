@@ -1,12 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Xml.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using static UnityEngine.GraphicsBuffer;
 
 public class HudController : MonoBehaviour
 {
@@ -19,9 +23,7 @@ public class HudController : MonoBehaviour
     public Image[] oppHealthUnits;
 
     public TMP_Text shieldText;
-
     public TMP_Text ammoText;
-
     public TMP_Text grenadeText;
 
     public TMP_Text killsText;
@@ -33,8 +35,14 @@ public class HudController : MonoBehaviour
     private GameObject opponentShieldObject;
 
     private ARTrackedImageManager trackedImageManager;
-
     private ARTrackedImage arTrackedImage;
+
+    public GameObject grenadePrefab;
+    private GameObject grenadeObject;
+    private bool throwGrenadeFlag = false;
+    private Transform grenadeMissStartTransform;        // Start Camera Transform for missed projectiles      
+
+    public GameObject explosionPrefab;
 
     public TMP_Text debugText;
 
@@ -52,7 +60,15 @@ public class HudController : MonoBehaviour
     private int MAX_GRENADES = 2;
     private string RESERVE_AMMO = "--";
 
-    string action = "";
+    private float GRENADE_VELOCITY = 0.03f;
+
+    //##//
+    // This var causes delays in updating the HUD
+    // Purpose: to allow animations to finish before updating HUD values
+    // Eg. Grenade shd fly and explode, then deal damage. Instead of dealing damage then flying.
+    // True -> HUD not updating, waiting for animation. False -> HUD updating normally.
+    private bool isWaitingForAnimation = false;
+    //##//
 
     // Action names
     private string SHOOT = "shoot";
@@ -94,42 +110,106 @@ public class HudController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        DisplayPlayerIdentifierText(PLAYER);
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Display HP text
-        DisplayHpText(PLAYER);
-        // Display HP units
-        DisplayHpUnits(PLAYER);
-        // Display SHIELD units
-        DisplayShieldUnits(PLAYER);
-        // Display Opponent HP
-        DisplayOppHp(OPPONENT);
+        if (isWaitingForAnimation == false)
+        {
+            // Display player identity
+            DisplayPlayerIdentifierText(PLAYER);
 
-        // Display Kills/Deaths
-        DisplayScore(PLAYER);
+            // Display HP text
+            DisplayHpText(PLAYER);
+            // Display HP units
+            DisplayHpUnits(PLAYER);
+            // Display SHIELD units
+            DisplayShieldUnits(PLAYER);
+            // Display Opponent HP
+            DisplayOppHp(OPPONENT);
 
-        // Display ammo count text
-        DisplayAmmoCountText(PLAYER);
-        // Display shield count text
-        DisplayShieldCountText(PLAYER);
-        // Display shield count text
-        DisplayGrenadeCountText(PLAYER);
+            // Display Kills/Deaths
+            DisplayScore(PLAYER);
+
+            // Display ammo count text
+            DisplayAmmoCountText(PLAYER);
+            // Display shield count text
+            DisplayShieldCountText(PLAYER);
+            // Display shield count text
+            DisplayGrenadeCountText(PLAYER);
 
 
-        // Display AR shield for player when shieldHp[0] > 0
-        DisplaySelfShieldOverlay(PLAYER);
-        // Display AR shield for opponent when ShieldHp[1] > 0
-        ////
+            // Display AR shield for player when shieldHp[0] > 0
+            DisplaySelfShieldOverlay(PLAYER);
+            // Display AR shield for opponent when ShieldHp[1] > 0
+            HandleOpponentShieldObject(OPPONENT);
+        }
 
         // Opponent detection
         DetectOpponent();
 
-        // Display opponent's shield object
-        HandleOpponentShieldObject(OPPONENT);
+        // Handle grenade instantiation and physics
+        HandleGrenadeObject();
+    }
+
+    // Generate explosion AR effect on opponent marker
+    void GenerateExplosion()
+    {
+        Instantiate(explosionPrefab, opponentPosition, Quaternion.identity);
+    }
+
+    // Handle grenade object inside Update function
+    // Create and launch grenade at opponent if detected, else launch straight
+    void HandleGrenadeObject()
+    {
+        // If throw grenade action is called, instantiate grenade
+        if (throwGrenadeFlag)
+        {
+            // Instantiate 0.5m below camera
+            float xPos = Camera.main.transform.position.x;
+            float yPos = Camera.main.transform.position.y - 0.5f;
+            float zPos = Camera.main.transform.position.z;
+            Vector3 currPos = new Vector3(xPos, yPos, zPos);
+            grenadeObject = Instantiate(grenadePrefab, currPos, Quaternion.identity);
+            // set flag to false again
+            throwGrenadeFlag = false;
+        }
+
+        // Grenade trajectory if grenadeObject exists
+        if (grenadeObject != null)
+        {
+            // Grenade behaviour if opponent on screen
+            if (isOpponentDetected)
+            {
+                grenadeObject.transform.position = Vector3.MoveTowards(grenadeObject.transform.position, arTrackedImage.transform.position, GRENADE_VELOCITY);
+                float grenadeToOppDistance = Vector3.Distance(grenadeObject.transform.position, arTrackedImage.transform.position);
+
+                // If grenade has reached opponent, destroy grenadeObject
+                if (grenadeToOppDistance < 0.01f)
+                {
+                    Destroy(grenadeObject);
+                    isWaitingForAnimation = false;
+                    // Call function to generate explosion directly on opponent
+                    GenerateExplosion();
+                }
+            }
+            // Grenade behaviour if opponent not found
+            // Unfreeze update since no damage being done
+            else
+            {
+                isWaitingForAnimation = false;
+                grenadeObject.transform.Translate(0, 0, 2*GRENADE_VELOCITY, grenadeMissStartTransform);
+                float grenadeToCameraDistance = Vector3.Distance(grenadeObject.transform.position, Camera.main.transform.position);
+
+                // If grenade is >15m from us, destroy grenadeObject
+                if (grenadeToCameraDistance > 15f)
+                {
+                    Destroy(grenadeObject);
+                }
+            }            
+        }
     }
 
     // Handles rendering of opponent's shield object
@@ -144,7 +224,10 @@ public class HudController : MonoBehaviour
         }
         else
         {
-            opponentShieldObject.SetActive(false);
+            if (opponentShieldObject != null)
+            {
+                opponentShieldObject.SetActive(false);
+            }
         }
     }
 
@@ -262,6 +345,21 @@ public class HudController : MonoBehaviour
         return (unitIndex * 10) < health;
     }
 
+    // Event which is called when action == GRENADE
+    // Set flag to true to indicate grenade should be thrown
+    // Set camera orientation for when grenade was thrown
+    void ThrowGrenadeEvent()
+    {
+        throwGrenadeFlag = true;
+
+        // Edit this to change grenadeMissStartpoint
+        //float xTargetMiss = Camera.main.transform.position.x;
+        //float yTargetMiss = Camera.main.transform.position.y;
+        //float zTargetMiss = Camera.main.transform.position.z;
+        //grenadeMissEndpoint = new Vector3(xTargetMiss, yTargetMiss, zTargetMiss);
+        grenadeMissStartTransform = Camera.main.transform;
+    }
+
     // Display action sent by game engine
     // Eg. "shoot" has firing and hitting of bullet effect
     // Shield not included as it has to remain on screen until shieldHp == 0
@@ -278,29 +376,49 @@ public class HudController : MonoBehaviour
 
     }
 
-    // Game Engine calls this function to send action to visualiser
-    // Handle what happens on visualiser for each action
-    // Return hit/miss to game engine for actions that require it
-    // Hit = 1, miss = 0
-    public int HandleActionFromGameEngine(string action)
+    /*
+    - Game Engine calls this function to send action to visualiser
+    - Handle what happens on visualiser for each action
+    - This means opponent's actions should NOT be handled here since we do not 
+    want to display their actions on OUR visualiser.
+    - Return hit/miss to game engine for actions that require it
+    - Hit = 1, miss = 0, ignore = -1
+    - Also FREEZE UPDATE to wait for animation
+    */
+    public int HandleActionFromGameEngine(string action, int player)
     {
-        this.action = action;
+        if (player != PLAYER)
+        {
+            return -1;
+        }
 
         // Actions that require tracking
         if (action == GRENADE)
         {
+
+            ThrowGrenadeEvent();
+            // freeze update /////////////////////////////
+            isWaitingForAnimation = true;
+
             // If opponent detected, return hit, display grenade flying to opp
             // Else, return miss, display grenade flying straight
-
-            // Return hit/miss
-            return 1;
+            return isOpponentDetected ? 1 : 0;
+            //if (isOpponentDetected == true)
+            //{  
+            //    return 1;
+            //}
+            //else
+            //{
+            //    // Return miss
+            //    return 0;
+            //}
         }
 
         // Other actions (shoot, reload)
         else
         {
             DisplayAction(action);
-            return 0;
+            return -1;
         }
     }
 
@@ -326,5 +444,19 @@ public class HudController : MonoBehaviour
     void DisplayDebugText(string msg)
     {
         debugText.text = msg;
+    }
+
+    public void SwitchPlayerPov()
+    {
+        if (PLAYER == 1)
+        {
+            PLAYER = 2;
+            OPPONENT = 1;
+        }
+        else if (PLAYER == 2)
+        {
+            PLAYER = 1;
+            OPPONENT= 2;
+        }
     }
 }
