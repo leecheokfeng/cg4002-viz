@@ -45,12 +45,12 @@ public class HudController : MonoBehaviour
 
     // Grenade objects
     public GameObject grenadePrefab;
-    private GameObject grenadeObject;
-    private Transform grenadeMissStartTransform;        // Start Camera Transform for missed projectiles      
+    private GameObject grenadeObject;            
+    private Vector3 grenadeMissTargetPos;        // Target position for missed projectiles
     public GameObject explosionPrefab;
 
     // Marvel objects
-    private Transform marvelMissStartTransform;
+    private Vector3 marvelMissTargetPos;
     public GameObject punchPrefab;
     public GameObject webPrefab;
     public GameObject portalPrefab;
@@ -197,9 +197,215 @@ public class HudController : MonoBehaviour
     {
         // If marvel action event is called, instantiate marvel object
         HandlePunchObject();
+        HandleWebObject();
+        HandlePortalObject();
+        HandleHammerObject();
+        HandleSpearObject();
     }
 
+    // Handle spear object. Put this inside HandleMarvelObjects
+    void HandleSpearObject()
+    {
+        // Instantiate spear object
+        if (marvelSpearFlag)
+        {
+            // Instantiate 0.5m below camera
+            float xPos = Camera.main.transform.position.x;
+            float yPos = Camera.main.transform.position.y - 0.5f;
+            float zPos = Camera.main.transform.position.z;
+            Vector3 currPos = new Vector3(xPos, yPos, zPos);
+            spearObject = Instantiate(spearPrefab, currPos, Quaternion.identity);
+            // set flag to false again
+            marvelSpearFlag = false;
+        }
 
+        // spear trajectory if spearObject exists
+        if (spearObject != null)
+        {
+            // spear behaviour if opponent on screen
+            if (isOpponentDetected)
+            {
+                spearObject.transform.position = Vector3.MoveTowards(spearObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
+                float spearToOppDistance = Vector3.Distance(spearObject.transform.position, arTrackedImage.transform.position);
+
+                // If spear has reached opponent, destroy spearObject
+                if (spearToOppDistance < 0.01f)
+                {
+                    Destroy(spearObject);
+                    isWaitingForAnimation = false;
+                    // Call function to generate explosion directly on opponent
+                    GenerateExplosion();
+                }
+            }
+            // spear behaviour if opponent not found
+            // Unfreeze update since no damage being done
+            else
+            {
+                isWaitingForAnimation = false;
+                spearObject.transform.position = Vector3.MoveTowards(spearObject.transform.position, marvelMissTargetPos, 2 * MARVEL_VELOCITY);
+                float spearToCameraDistance = Vector3.Distance(spearObject.transform.position, Camera.main.transform.position);
+
+                // If spear is >15m from us, destroy spearObject
+                if (spearToCameraDistance > 15f)
+                {
+                    Destroy(spearObject);
+                }
+            }
+        }
+    }
+
+    // Handle hammer object. Put this inside HandleMarvelObjects
+    void HandleHammerObject()
+    {
+        // Instantiate hammer object
+        if (marvelHammerFlag)
+        {
+            // Instantiate 0.5m below camera
+            float xPos = Camera.main.transform.position.x;
+            float yPos = Camera.main.transform.position.y - 0.5f;
+            float zPos = Camera.main.transform.position.z;
+            Vector3 currPos = new Vector3(xPos, yPos, zPos);
+            hammerObject = Instantiate(hammerPrefab, currPos, Quaternion.identity);
+            // set flag to false again
+            marvelHammerFlag = false;
+        }
+
+        // hammer trajectory if hammerObject exists
+        if (hammerObject != null)
+        {
+            // hammer behaviour if opponent on screen
+            if (isOpponentDetected)
+            {
+                hammerObject.transform.position = Vector3.MoveTowards(hammerObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
+                float hammerToOppDistance = Vector3.Distance(hammerObject.transform.position, arTrackedImage.transform.position);
+
+                // If hammer has reached opponent, destroy hammerObject
+                if (hammerToOppDistance < 0.01f)
+                {
+                    Destroy(hammerObject);
+                    isWaitingForAnimation = false;
+                    // Call function to generate explosion directly on opponent
+                    GenerateExplosion();
+                }
+            }
+            // hammer behaviour if opponent not found
+            // Unfreeze update since no damage being done
+            else
+            {
+                isWaitingForAnimation = false;
+                hammerObject.transform.position = Vector3.MoveTowards(hammerObject.transform.position, marvelMissTargetPos, 2 * MARVEL_VELOCITY);
+                float hammerToCameraDistance = Vector3.Distance(hammerObject.transform.position, Camera.main.transform.position);
+
+                // If hammer is >15m from us, destroy hammerObject
+                if (hammerToCameraDistance > 15f)
+                {
+                    Destroy(hammerObject);
+                }
+            }
+        }
+    }
+
+    // Handle portal object. Put this inside HandleMarvelObjects
+    void HandlePortalObject()
+    {
+        // Instantiate portal object
+        if (marvelPortalFlag)
+        {
+            // Instantiate 0.5m below camera
+            float xPos = Camera.main.transform.position.x;
+            float yPos = Camera.main.transform.position.y - 0.5f;
+            float zPos = Camera.main.transform.position.z;
+            Vector3 currPos = new Vector3(xPos, yPos, zPos);
+            portalObject = Instantiate(portalPrefab, currPos, Quaternion.identity);
+            // set flag to false again
+            marvelPortalFlag = false;
+        }
+
+        // portal trajectory if portalObject exists
+        if (portalObject != null)
+        {
+            // portal behaviour if opponent on screen
+            if (isOpponentDetected)
+            {
+                portalObject.transform.position = Vector3.MoveTowards(portalObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
+                float portalToOppDistance = Vector3.Distance(portalObject.transform.position, arTrackedImage.transform.position);
+
+                // If portal has reached opponent, destroy portalObject
+                if (portalToOppDistance < 0.01f)
+                {
+                    Destroy(portalObject);
+                    isWaitingForAnimation = false;
+                    // Call function to generate explosion directly on opponent
+                    GenerateExplosion();
+                }
+            }
+            // portal behaviour if opponent not found
+            // Unfreeze update since no damage being done
+            else
+            {
+                isWaitingForAnimation = false;
+                portalObject.transform.position = Vector3.MoveTowards(portalObject.transform.position, marvelMissTargetPos, 2 * MARVEL_VELOCITY);
+                float portalToCameraDistance = Vector3.Distance(portalObject.transform.position, Camera.main.transform.position);
+
+                // If portal is >15m from us, destroy portalObject
+                if (portalToCameraDistance > 15f)
+                {
+                    Destroy(portalObject);
+                }
+            }
+        }
+    }
+
+    // Handle web object. Put this inside HandleMarvelObjects
+    void HandleWebObject()
+    {
+        // Instantiate web object
+        if (marvelWebFlag)
+        {
+            // Instantiate 0.5m below camera
+            float xPos = Camera.main.transform.position.x;
+            float yPos = Camera.main.transform.position.y - 0.5f;
+            float zPos = Camera.main.transform.position.z;
+            Vector3 currPos = new Vector3(xPos, yPos, zPos);
+            webObject = Instantiate(webPrefab, currPos, Quaternion.identity);
+            // set flag to false again
+            marvelWebFlag = false;
+        }
+
+        // web trajectory if webObject exists
+        if (webObject != null)
+        {
+            // web behaviour if opponent on screen
+            if (isOpponentDetected)
+            {
+                webObject.transform.position = Vector3.MoveTowards(webObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
+                float webToOppDistance = Vector3.Distance(webObject.transform.position, arTrackedImage.transform.position);
+
+                // If web has reached opponent, destroy webObject
+                if (webToOppDistance < 0.01f)
+                {
+                    Destroy(webObject);
+                    isWaitingForAnimation = false;
+                    // Call function to generate explosion directly on opponent
+                    GenerateExplosion();
+                }
+            }
+            // web behaviour if opponent not found
+            // Unfreeze update since no damage being done
+            else
+            {
+                isWaitingForAnimation = false;
+                webObject.transform.position = Vector3.MoveTowards(webObject.transform.position, marvelMissTargetPos, 2 * MARVEL_VELOCITY);
+                float webToCameraDistance = Vector3.Distance(webObject.transform.position, Camera.main.transform.position);
+
+                // If web is >15m from us, destroy webObject
+                if (webToCameraDistance > 15f)
+                {
+                    Destroy(webObject);
+                }
+            }
+        }
+    }
 
     // Handle punch object. Put this inside HandleMarvelObjects
     void HandlePunchObject()
@@ -240,7 +446,7 @@ public class HudController : MonoBehaviour
             else
             {
                 isWaitingForAnimation = false;
-                punchObject.transform.Translate(0, 0, 2 * MARVEL_VELOCITY, marvelMissStartTransform);
+                punchObject.transform.position = Vector3.MoveTowards(punchObject.transform.position, marvelMissTargetPos, 2 * MARVEL_VELOCITY);
                 float punchToCameraDistance = Vector3.Distance(punchObject.transform.position, Camera.main.transform.position);
 
                 // If punch is >15m from us, destroy punchObject
@@ -298,7 +504,7 @@ public class HudController : MonoBehaviour
             else
             {
                 isWaitingForAnimation = false;
-                grenadeObject.transform.Translate(0, 0, 2*GRENADE_VELOCITY, grenadeMissStartTransform);
+                grenadeObject.transform.position = Vector3.MoveTowards(grenadeObject.transform.position, grenadeMissTargetPos, 2 * GRENADE_VELOCITY);
                 float grenadeToCameraDistance = Vector3.Distance(grenadeObject.transform.position, Camera.main.transform.position);
 
                 // If grenade is >15m from us, destroy grenadeObject
@@ -469,7 +675,8 @@ public class HudController : MonoBehaviour
             marvelSpearFlag = true;
         }
 
-        marvelMissStartTransform = Camera.main.transform;
+        // returns a point exactly 20 meters in front of the camera, at centre of screen (0.5, 0.5):
+        marvelMissTargetPos = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 20f));
     }
 
     // Event which is called when action == GRENADE
@@ -484,7 +691,10 @@ public class HudController : MonoBehaviour
         //float yTargetMiss = Camera.main.transform.position.y;
         //float zTargetMiss = Camera.main.transform.position.z;
         //grenadeMissEndpoint = new Vector3(xTargetMiss, yTargetMiss, zTargetMiss);
-        grenadeMissStartTransform = Camera.main.transform;
+        //grenadeMissStartTransform = Camera.main.transform;
+
+        // returns a point exactly 20 meters in front of the camera, at centre of screen (0.5, 0.5):
+        grenadeMissTargetPos = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 20f));
     }
 
     // Display action sent by game engine
