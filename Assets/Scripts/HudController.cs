@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Xml.Linq;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
@@ -14,6 +15,7 @@ using static UnityEngine.GraphicsBuffer;
 
 public class HudController : MonoBehaviour
 {
+    // Health and shields HUD
     public TMP_Text healthText;
     public Image healthBar;
     public Image[] healthUnits;
@@ -22,33 +24,60 @@ public class HudController : MonoBehaviour
     public Image oppHealthBar;
     public Image[] oppHealthUnits;
 
+    // Inventory HUD
     public TMP_Text shieldText;
     public TMP_Text ammoText;
     public TMP_Text grenadeText;
 
+    // Score and Identity HUD
     public TMP_Text killsText;
     public TMP_Text deathsText;
     public TMP_Text playerIdentifierText;
 
+    // Shield objects
     public Image selfShieldOverlay;
     public GameObject opponentShieldPrefab;
     private GameObject opponentShieldObject;
 
+    // Tracked image manager
     private ARTrackedImageManager trackedImageManager;
     private ARTrackedImage arTrackedImage;
 
+    // Grenade objects
     public GameObject grenadePrefab;
     private GameObject grenadeObject;
-    private bool throwGrenadeFlag = false;
     private Transform grenadeMissStartTransform;        // Start Camera Transform for missed projectiles      
-
     public GameObject explosionPrefab;
+
+    // Marvel objects
+    private Transform marvelMissStartTransform;
+    public GameObject punchPrefab;
+    public GameObject webPrefab;
+    public GameObject portalPrefab;
+    public GameObject hammerPrefab;
+    public GameObject spearPrefab;
+    private GameObject punchObject;
+    private GameObject webObject;
+    private GameObject portalObject;
+    private GameObject hammerObject;
+    private GameObject spearObject;
 
     public TMP_Text debugText;
 
+    // Action flags
+    private bool throwGrenadeFlag = false;
+    private bool marvelPunchFlag = false;
+    private bool marvelWebFlag = false;
+    private bool marvelPortalFlag = false;
+    private bool marvelHammerFlag = false;
+    private bool marvelSpearFlag = false;
+    //private bool[] marvelFlags = { false, false, false, false, false };     // Action to index map found in Start() dictionary
+
+    // Opponent detection
     private bool isOpponentDetected = false;
     private Vector3 opponentPosition;
 
+    // Visualiser game state
     private int[] health = { 100, 100 };
     private int[] shieldHp = { 0, 0 };
     private int[] shieldsLeft = { 3, 3 };
@@ -61,6 +90,7 @@ public class HudController : MonoBehaviour
     private string RESERVE_AMMO = "--";
 
     private float GRENADE_VELOCITY = 0.03f;
+    private float MARVEL_VELOCITY = 0.03f;
 
     //##//
     // This var causes delays in updating the HUD
@@ -75,6 +105,11 @@ public class HudController : MonoBehaviour
     private string RELOAD = "reload";
     private string SHIELD = "shield";
     private string GRENADE = "grenade";
+    private static string PUNCH = "punch";
+    private static string WEB = "web";
+    private static string PORTAL = "portal";
+    private static string HAMMER = "hammer";
+    private static string SPEAR = "spear";
 
     // For now, we are always player 1, opponent is player 2
     // Change these to view POV of each player's screen
@@ -110,7 +145,7 @@ public class HudController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -152,6 +187,69 @@ public class HudController : MonoBehaviour
 
         // Handle grenade instantiation and physics
         HandleGrenadeObject();
+
+        // Handle marvel objects instantiation and physics
+        HandleMarvelObjects();
+    }
+
+    // Handle all marvel objects inside Update function
+    void HandleMarvelObjects()
+    {
+        // If marvel action event is called, instantiate marvel object
+        HandlePunchObject();
+    }
+
+
+
+    // Handle punch object. Put this inside HandleMarvelObjects
+    void HandlePunchObject()
+    {
+        // Instantiate punch object
+        if (marvelPunchFlag)
+        {
+            // Instantiate 0.5m below camera
+            float xPos = Camera.main.transform.position.x;
+            float yPos = Camera.main.transform.position.y - 0.5f;
+            float zPos = Camera.main.transform.position.z;
+            Vector3 currPos = new Vector3(xPos, yPos, zPos);
+            punchObject = Instantiate(punchPrefab, currPos, Quaternion.identity);
+            // set flag to false again
+            marvelPunchFlag = false;
+        }
+
+        // Punch trajectory if punchObject exists
+        if (punchObject != null)
+        {
+            // Punch behaviour if opponent on screen
+            if (isOpponentDetected)
+            {
+                punchObject.transform.position = Vector3.MoveTowards(punchObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
+                float punchToOppDistance = Vector3.Distance(punchObject.transform.position, arTrackedImage.transform.position);
+
+                // If punch has reached opponent, destroy punchObject
+                if (punchToOppDistance < 0.01f)
+                {
+                    Destroy(punchObject);
+                    isWaitingForAnimation = false;
+                    // Call function to generate explosion directly on opponent
+                    GenerateExplosion();
+                }
+            }
+            // Punch behaviour if opponent not found
+            // Unfreeze update since no damage being done
+            else
+            {
+                isWaitingForAnimation = false;
+                punchObject.transform.Translate(0, 0, 2 * MARVEL_VELOCITY, marvelMissStartTransform);
+                float punchToCameraDistance = Vector3.Distance(punchObject.transform.position, Camera.main.transform.position);
+
+                // If punch is >15m from us, destroy punchObject
+                if (punchToCameraDistance > 15f)
+                {
+                    Destroy(punchObject);
+                }
+            }
+        }
     }
 
     // Generate explosion AR effect on opponent marker
@@ -345,6 +443,35 @@ public class HudController : MonoBehaviour
         return (unitIndex * 10) < health;
     }
 
+    // Event which is called when action == PUNCH || action == WEB || action == PORTAL || action == HAMMER || action == SPEAR
+    // Set respective flags to true
+    // Set camera transform at point of attack
+    void MarvelAttackEvent(string action)
+    {
+        if (action == PUNCH)
+        {
+            marvelPunchFlag = true;
+        }
+        else if (action == WEB)
+        {
+            marvelWebFlag = true;
+        }
+        else if (action == PORTAL)
+        {
+            marvelPortalFlag = true;
+        }
+        else if (action == HAMMER)
+        {
+            marvelHammerFlag = true;
+        }
+        else if (action == SPEAR)
+        {
+            marvelSpearFlag = true;
+        }
+
+        marvelMissStartTransform = Camera.main.transform;
+    }
+
     // Event which is called when action == GRENADE
     // Set flag to true to indicate grenade should be thrown
     // Set camera orientation for when grenade was thrown
@@ -393,9 +520,9 @@ public class HudController : MonoBehaviour
         }
 
         // Actions that require tracking
+        // Grenade
         if (action == GRENADE)
         {
-
             ThrowGrenadeEvent();
             // freeze update /////////////////////////////
             isWaitingForAnimation = true;
@@ -403,15 +530,16 @@ public class HudController : MonoBehaviour
             // If opponent detected, return hit, display grenade flying to opp
             // Else, return miss, display grenade flying straight
             return isOpponentDetected ? 1 : 0;
-            //if (isOpponentDetected == true)
-            //{  
-            //    return 1;
-            //}
-            //else
-            //{
-            //    // Return miss
-            //    return 0;
-            //}
+        }
+        // Marvel actions
+        else if (action == PUNCH || action == WEB || action == PORTAL ||
+            action == HAMMER || action == SPEAR)
+        {
+            MarvelAttackEvent(action);
+            // freeze update /////////////////////////////
+            isWaitingForAnimation = true;
+
+            return isOpponentDetected ? 1 : 0;
         }
 
         // Other actions (shoot, reload)

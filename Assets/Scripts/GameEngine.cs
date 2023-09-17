@@ -28,6 +28,11 @@ public class GameEngine : MonoBehaviour
     private string RELOAD = "reload";
     private string SHIELD = "shield";
     private string GRENADE = "grenade";
+    private string PUNCH = "punch";
+    private string WEB = "web";
+    private string PORTAL = "portal";
+    private string HAMMER = "hammer";
+    private string SPEAR = "spear";
 
 
     // Start is called before the first frame update
@@ -70,6 +75,18 @@ public class GameEngine : MonoBehaviour
         }
 
         // Marvel damage actions
+        if (action == PUNCH || action == WEB || action == PORTAL || 
+            action == HAMMER || action == SPEAR)
+        {
+            // Send action to visualiser
+            SendActionToVisualiser(action, player);
+            // Visualiser determines hit/miss and replies
+            // Update game state accordingly
+            HandleMarvel(player);
+            SendGameStateToVisualiser();
+            // Reset opponent detection
+            isOpponentDetected[playerIndex] = false;
+        }
 
         // Grenade
         if (action == GRENADE)
@@ -123,6 +140,15 @@ public class GameEngine : MonoBehaviour
         }
 
         // Marvel damage actions
+        if (action == PUNCH || action == WEB || action == PORTAL ||
+            action == HAMMER || action == SPEAR)
+        {
+            SendActionToVisualiser(action, player);
+            HandleMarvel(player);
+            SendGameStateToVisualiser();
+            // Reset opponent detection
+            isOpponentDetected[playerIndex] = false;
+        }
 
         // Grenade
         if (action == GRENADE)
@@ -175,7 +201,8 @@ public class GameEngine : MonoBehaviour
         }
 
         // Actions that require tracking
-        if (action == GRENADE)
+        if (action == GRENADE || action == PUNCH || action == WEB || action == PORTAL ||
+            action == HAMMER || action == SPEAR)
         {
             isOpponentDetected[playerIndex] = (response == 1) ? true : false;
         }
@@ -188,6 +215,17 @@ public class GameEngine : MonoBehaviour
         int[] p1_state = { health[0], shieldHp[0], shieldsLeft[0], ammoLeft[0], grenadesLeft[0], deaths[0] };
         int[] p2_state = { health[1], shieldHp[1], shieldsLeft[1], ammoLeft[1], grenadesLeft[1], deaths[1] };
         hudController.ChangeGameState(p1_state, p2_state);
+    }
+
+    // Marvel attack
+    void HandleMarvel(int player)
+    {
+        int playerIndex = (player == 1) ? 0 : 1;
+        if (isOpponentDetected[playerIndex] == true)
+        {
+            int damagedPlayer = (player == 1) ? 2 : 1;
+            TakeDamage(damagedPlayer, 10);
+        }
     }
 
     // Grenade thrown
