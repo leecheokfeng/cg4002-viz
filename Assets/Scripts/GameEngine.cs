@@ -1,3 +1,4 @@
+using CymaticLabs.Unity3D.Amqp.SimpleJSON;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,6 +34,29 @@ public class GameEngine : MonoBehaviour
     private string PORTAL = "portal";
     private string HAMMER = "hammer";
     private string SPEAR = "spear";
+
+    // Dummy game state from eval server
+    private string DUMMY_P1 = "{\"hp\":90, \"bullets\":5, \"grenades\":2, " +
+        "\"shield_hp\":20, \"shields\":2, \"deaths\":3}";
+    private string DUMMY_P2 = "{\"hp\":80, \"bullets\":4, \"grenades\":1, " +
+        "\"shield_hp\":10, \"shields\":1, \"deaths\":2}";
+
+    // Class for decoding JSON from Eval Server
+    public class PlayerInfo
+    {
+        public int hp;
+        public int bullets;
+        public int grenades;
+        public int shield_hp;
+        public int shields;
+        public int deaths;
+
+        // Convert JSON to object
+        public static PlayerInfo CreateFromJSON(string jsonString)
+        {
+            return JsonUtility.FromJson<PlayerInfo>(jsonString);
+        }
+    }
 
 
     // Start is called before the first frame update
@@ -215,6 +239,31 @@ public class GameEngine : MonoBehaviour
         int[] p1_state = { health[0], shieldHp[0], shieldsLeft[0], ammoLeft[0], grenadesLeft[0], deaths[0] };
         int[] p2_state = { health[1], shieldHp[1], shieldsLeft[1], ammoLeft[1], grenadesLeft[1], deaths[1] };
         hudController.ChangeGameState(p1_state, p2_state);
+    }
+
+    // Simulate receiving correct game state from Eval Server
+    // This function sets game state to values found in dummy data from Eval Server
+    // Then sends the game state to visualiser
+    public void ReceiveFromEvalServer()
+    {
+        PlayerInfo player1Obj = PlayerInfo.CreateFromJSON(DUMMY_P1);
+        PlayerInfo player2Obj = PlayerInfo.CreateFromJSON(DUMMY_P2);
+
+        health[0] = player1Obj.hp;
+        shieldHp[0] = player1Obj.shield_hp;
+        shieldsLeft[0] = player1Obj.shields;
+        ammoLeft[0] = player1Obj.bullets;
+        grenadesLeft[0] = player1Obj.grenades;
+        deaths[0] = player1Obj.deaths;
+
+        health[1] = player2Obj.hp;
+        shieldHp[1] = player2Obj.shield_hp;
+        shieldsLeft[1] = player2Obj.shields;
+        ammoLeft[1] = player2Obj.bullets;
+        grenadesLeft[1] = player2Obj.grenades;
+        deaths[1] = player2Obj.deaths;
+
+        SendGameStateToVisualiser();
     }
 
     // Marvel attack
