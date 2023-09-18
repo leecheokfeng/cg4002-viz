@@ -62,6 +62,10 @@ public class HudController : MonoBehaviour
     private GameObject hammerObject;
     private GameObject spearObject;
 
+    // Other AR effects
+    public GameObject muzzleFlashPrefab;
+    public GameObject bulletSparksPrefab;
+
     public TMP_Text debugText;
 
     // Action flags
@@ -418,7 +422,8 @@ public class HudController : MonoBehaviour
             float yPos = Camera.main.transform.position.y - 0.5f;
             float zPos = Camera.main.transform.position.z;
             Vector3 currPos = new Vector3(xPos, yPos, zPos);
-            punchObject = Instantiate(punchPrefab, currPos, Quaternion.identity);
+            //punchObject = Instantiate(punchPrefab, currPos, Quaternion.identity);
+            punchObject = Instantiate(punchPrefab, currPos, Quaternion.AngleAxis(90, Vector3.right));
             // set flag to false again
             marvelPunchFlag = false;
         }
@@ -707,10 +712,46 @@ public class HudController : MonoBehaviour
         Debug.Log("displaying action...");
 
         // AR Effect for shoot
+        // Assume hit
+        if (action == SHOOT)
+        {
+            // generate muzzle flash
+            GenerateMuzzleFlash();
+            // generate sparks on opponent
+            GenerateBulletSparks();
+        }
 
         // AR Effect for reload
+        if (action == RELOAD)
+        {
+            StartCoroutine(ReloadWaiter());   
+        }
 
+    }
 
+    // Generate muzzle flash AR effect
+    void GenerateMuzzleFlash()
+    {
+        Instantiate(muzzleFlashPrefab, Camera.main.ViewportToWorldPoint(new Vector3(0.75f, 0.35f, 0.1f)), Quaternion.identity);
+    }
+
+    // Generate bullet sparks AR effect
+    void GenerateBulletSparks()
+    {
+        if (isOpponentDetected == true)
+        {
+            Instantiate(bulletSparksPrefab, opponentPosition, Quaternion.identity);
+        }
+    }
+
+    // Execute reload animation
+    IEnumerator ReloadWaiter()
+    {
+        ammoText.color = Color.red;
+        isWaitingForAnimation = true;
+        yield return new WaitForSeconds(1);
+        ammoText.color = Color.white;
+        isWaitingForAnimation = false;
     }
 
     /*
