@@ -10,6 +10,17 @@
             "Password": "guest",
             "ReconnectInterval": 5,
             "RequestedHeartBeat": 30
+        },
+        {
+            "Name": "CloudAMQP",
+            "Host": "amqps://gbkqetkk:wpH-gUAs27wzFfZXvcjeIREs80kPaIJi@octopus.rmq3.cloudamqp.com/gbkqetkk",
+            "AmqpPort": 5672,
+            "WebPort": 15672,
+            "VirtualHost": "/",
+            "Username": "gbkqetkk",
+            "Password": "wpH-gUAs27wzFfZXvcjeIREs80kPaIJi",
+            "ReconnectInterval": 5,
+            "RequestedHeartBeat": 30
         }
     ]
 }

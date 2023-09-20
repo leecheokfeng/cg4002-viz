@@ -251,8 +251,8 @@ public class HudController : MonoBehaviour
                 spearObject.transform.position = Vector3.MoveTowards(spearObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float spearToCameraDistance = Vector3.Distance(spearObject.transform.position, Camera.main.transform.position);
 
-                // If spear is >15m from us, destroy spearObject
-                if (spearToCameraDistance > 15f)
+                // If spear is >10m from us, destroy spearObject
+                if (spearToCameraDistance > 10f)
                 {
                     Destroy(spearObject);
                 }
@@ -303,8 +303,8 @@ public class HudController : MonoBehaviour
                 hammerObject.transform.position = Vector3.MoveTowards(hammerObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float hammerToCameraDistance = Vector3.Distance(hammerObject.transform.position, Camera.main.transform.position);
 
-                // If hammer is >15m from us, destroy hammerObject
-                if (hammerToCameraDistance > 15f)
+                // If hammer is >10m from us, destroy hammerObject
+                if (hammerToCameraDistance > 10f)
                 {
                     Destroy(hammerObject);
                 }
@@ -354,8 +354,8 @@ public class HudController : MonoBehaviour
                 portalObject.transform.position = Vector3.MoveTowards(portalObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float portalToCameraDistance = Vector3.Distance(portalObject.transform.position, Camera.main.transform.position);
 
-                // If portal is >15m from us, destroy portalObject
-                if (portalToCameraDistance > 15f)
+                // If portal is >10m from us, destroy portalObject
+                if (portalToCameraDistance > 10f)
                 {
                     Destroy(portalObject);
                 }
@@ -405,8 +405,8 @@ public class HudController : MonoBehaviour
                 webObject.transform.position = Vector3.MoveTowards(webObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float webToCameraDistance = Vector3.Distance(webObject.transform.position, Camera.main.transform.position);
 
-                // If web is >15m from us, destroy webObject
-                if (webToCameraDistance > 15f)
+                // If web is >10m from us, destroy webObject
+                if (webToCameraDistance > 10f)
                 {
                     Destroy(webObject);
                 }
@@ -457,8 +457,8 @@ public class HudController : MonoBehaviour
                 punchObject.transform.position = Vector3.MoveTowards(punchObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float punchToCameraDistance = Vector3.Distance(punchObject.transform.position, Camera.main.transform.position);
 
-                // If punch is >15m from us, destroy punchObject
-                if (punchToCameraDistance > 15f)
+                // If punch is >10m from us, destroy punchObject
+                if (punchToCameraDistance > 10f)
                 {
                     Destroy(punchObject);
                 }
@@ -515,8 +515,8 @@ public class HudController : MonoBehaviour
                 grenadeObject.transform.position = Vector3.MoveTowards(grenadeObject.transform.position, grenadeMissTargetPos, 2 * GRENADE_VELOCITY);
                 float grenadeToCameraDistance = Vector3.Distance(grenadeObject.transform.position, Camera.main.transform.position);
 
-                // If grenade is >15m from us, destroy grenadeObject
-                if (grenadeToCameraDistance > 15f)
+                // If grenade is >10m from us, destroy grenadeObject
+                if (grenadeToCameraDistance > 10f)
                 {
                     Destroy(grenadeObject);
                 }
@@ -577,7 +577,7 @@ public class HudController : MonoBehaviour
         selfShieldOverlay.enabled = shieldHp[playerIndex] > 0;
     }
 
-    // Display shield count text
+    // Display grenade count text
     void DisplayGrenadeCountText(int player)
     {
         int playerIndex = (player == 1) ? 0 : 1;

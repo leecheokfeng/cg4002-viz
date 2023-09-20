@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MyPhoneScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/M2MqttUnity_Test.unity
+    guid: fad30ee856646504c9bfaacfe2247591
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: b98bc68fca475794aa4cab9c49f103bc, type: 2}
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 4f11cdebb7e65bf458a9d2de01a034d9, type: 2}

@@ -58,7 +58,7 @@ namespace M2MqttUnity.Examples
 
         public void TestPublish()
         {
-            client.Publish("M2MQTT_Unity/test", System.Text.Encoding.UTF8.GetBytes("Test message"), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
+            client.Publish("Player 1 Visibility", System.Text.Encoding.UTF8.GetBytes("Can see"), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
             Debug.Log("Test message published");
             AddUiMessage("Test message published.");
         }
@@ -122,12 +122,12 @@ namespace M2MqttUnity.Examples
 
         protected override void SubscribeTopics()
         {
-            client.Subscribe(new string[] { "M2MQTT_Unity/test" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+            client.Subscribe(new string[] { "Player 1 Action" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
         }
 
         protected override void UnsubscribeTopics()
         {
-            client.Unsubscribe(new string[] { "M2MQTT_Unity/test" });
+            client.Unsubscribe(new string[] { "Player 1 Action" });
         }
 
         protected override void OnConnectionFailed(string errorMessage)
@@ -205,7 +205,7 @@ namespace M2MqttUnity.Examples
             string msg = System.Text.Encoding.UTF8.GetString(message);
             Debug.Log("Received: " + msg);
             StoreMessage(msg);
-            if (topic == "M2MQTT_Unity/test")
+            if (topic == "Player 1 Action")
             {
                 if (autoTest)
                 {
