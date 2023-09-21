@@ -553,6 +553,7 @@ public class HudController : MonoBehaviour
             opponentPosition = arTrackedImage.transform.position;
             if (arTrackedImage.trackingState == TrackingState.Tracking)
             {
+                arTrackedImage.gameObject.SetActive(true);
                 DisplayDebugText("image detected!! " + opponentPosition.ToString());
                 isOpponentDetected = true;
 
@@ -564,6 +565,11 @@ public class HudController : MonoBehaviour
             }
             else
             {
+                // hide arTrackedImage cube
+                arTrackedImage.gameObject.SetActive(false);
+                //arTrackedImage.enabled = false;
+                //arTrackedImage.enabled = arTrackedImage.trackingState == TrackingState.Tracking ? true : false;
+                //arTrackedImage = false;
                 DisplayDebugText("image not found " + opponentPosition.ToString());
                 isOpponentDetected = false;
             }
