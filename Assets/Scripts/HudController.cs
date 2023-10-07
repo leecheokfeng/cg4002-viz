@@ -741,7 +741,7 @@ public class HudController : MonoBehaviour
     // Generate muzzle flash AR effect
     void GenerateMuzzleFlash()
     {
-        Instantiate(muzzleFlashPrefab, Camera.main.ViewportToWorldPoint(new Vector3(0.75f, 0.35f, 0.1f)), Quaternion.identity);
+        Instantiate(muzzleFlashPrefab, Camera.main.ViewportToWorldPoint(new Vector3(0.25f, 0.35f, 0.1f)), Quaternion.identity);
     }
 
     // Generate bullet sparks AR effect
