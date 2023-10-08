@@ -13,12 +13,13 @@ public class MqttUnityClient : MonoBehaviour
 {
     private MqttClient client;
     public string broker = "test.mosquitto.org";
-    public string gamestateTopic = "Player 1 GameState"; //change as needed for Player 2
-    public string actionTopic = "Player 1 Action"; //change as needed for Player 2
-    public string visibilityTopic = "Player 2 Visibility"; //change as needed for Player 2. Player 2 sees Player 1 so for Player 2 it should be Player 1 Visibility
+
+    // Topics to subscribe/publish to
+    private string gamestateTopic = "";
+    private string actionTopic = "";
+    private string visibilityTopic = "";
 
     public HudController hudController;
-    private int PLAYER = 1;
 
     // List to store the messages
     private List<string> eventMessages = new List<string>();
@@ -27,18 +28,8 @@ public class MqttUnityClient : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        client = new MqttClient(broker);
-
-        // Register to message received event
-        client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
-
-        // Create a unique client ID and connect
-        string clientId = System.Guid.NewGuid().ToString();
-        client.Connect(clientId);
-
-        // Subscribe to topics
-        client.Subscribe(new string[] { gamestateTopic, actionTopic },
-            new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+        SetupClient();
+        
     }
 
     // What happens when client receives a message
@@ -57,6 +48,8 @@ public class MqttUnityClient : MonoBehaviour
         {
             string action = receivedMessage;
             Debug.Log($"Received action. Action: {action}");
+            Debug.Log($"e.Topic is: {e.Topic}");
+            Debug.Log($"actionTopic is: {actionTopic}");
 
             // Delimiter "-"
             StoreMessage(e.Topic + "-" + action);
@@ -85,6 +78,46 @@ public class MqttUnityClient : MonoBehaviour
         {
             client.Disconnect();
         }
+    }
+
+    // Re-Setup broker to client connections. Put this in Start() or
+    // call this (as debug mode button) whenever POV changes
+    public void SetupClient()
+    {
+        // Disconnect from current connection.
+        if (client != null)
+        {
+            client.Disconnect();
+        }
+
+        // Handle subcribed/published topics depending on player
+        // Player 1
+        if (ChangeScene.player == 1)
+        {
+            gamestateTopic = "Player 1 GameState";
+            actionTopic = "Player 1 Action";
+            visibilityTopic = "Player 2 Visibility";
+        }
+        // Player 2
+        else
+        {
+            gamestateTopic = "Player 2 GameState";
+            actionTopic = "Player 2 Action";
+            visibilityTopic = "Player 1 Visibility";
+        }
+
+        client = new MqttClient(broker);
+
+        // Register to message received event
+        client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
+
+        // Create a unique client ID and connect
+        string clientId = System.Guid.NewGuid().ToString();
+        client.Connect(clientId);
+
+        // Subscribe to topics
+        client.Subscribe(new string[] { gamestateTopic, actionTopic },
+            new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
     }
 
     // Update is called once per frame
@@ -168,7 +201,7 @@ public class MqttUnityClient : MonoBehaviour
     // Transmit action to HudController and get response if needed
     bool TransmitActionToVisualiser(string action)
     {
-        int response = hudController.HandleActionFromGameEngine(action, PLAYER);
+        int response = hudController.HandleActionFromGameEngine(action, ChangeScene.player);
         // if opponent is detected, return true
         if (response == 1)
         {

@@ -862,11 +862,15 @@ public class HudController : MonoBehaviour
         {
             PLAYER = 2;
             OPPONENT = 1;
+
+            ChangeScene.player = 2;
         }
         else if (PLAYER == 2)
         {
             PLAYER = 1;
             OPPONENT= 2;
+
+            ChangeScene.player = 1;
         }
     }
 }
