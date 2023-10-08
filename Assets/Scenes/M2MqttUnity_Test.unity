@@ -2381,7 +2381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3501bb4fc91df94bb930820ae18ba3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brokerAddress: iot.eclipse.org
+  brokerAddress: test.mosquitto.org
   brokerPort: 1883
   isEncrypted: 0
   certificateName: 

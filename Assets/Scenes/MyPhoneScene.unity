@@ -693,6 +693,7 @@ GameObject:
   - component: {fileID: 40919616}
   - component: {fileID: 40919626}
   - component: {fileID: 40919625}
+  - component: {fileID: 40919627}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -981,6 +982,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebfb21e3cedbc7a4787466a9226edfa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hudController: {fileID: 40919625}
+--- !u!114 &40919627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 40919614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc3f15da8613df5408548190c2c43244, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  broker: test.mosquitto.org
+  gameStateTopic: Player 1 GameState
+  actionTopic: Player 1 Action
+  visibilityTopic: Player 2 Visibility
   hudController: {fileID: 40919625}
 --- !u!1 &49902411
 GameObject:
