@@ -996,7 +996,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   broker: test.mosquitto.org
-  gameStateTopic: Player 1 GameState
+  gamestateTopic: Player 1 GameState
   actionTopic: Player 1 Action
   visibilityTopic: Player 2 Visibility
   hudController: {fileID: 40919625}
@@ -2831,7 +2831,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: View MQTT UI
+  m_text: View Main Menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3475,7 +3475,7 @@ GameObject:
   - component: {fileID: 686259879}
   - component: {fileID: 686259882}
   m_Layer: 5
-  m_Name: GoToMqttUIButton
+  m_Name: GoToMainMenuButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3552,7 +3552,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: Player 1 Visibility
           m_BoolArgument: 0

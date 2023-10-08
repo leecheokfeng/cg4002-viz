@@ -130,11 +130,11 @@ public class HudController : MonoBehaviour
     private static string EXIT = "9";
     private static string SHOOT_MISS = "10";
     private static string SHOOT_HIT = "11";
-    
-    // For now, we are always player 1, opponent is player 2
-    // Change these to view POV of each player's screen
-    private int PLAYER = 1;
-    private int OPPONENT = 2;
+
+    // Debug mode: Change these to view POV of each player's screen
+    // Play mode: We select our player in main menu
+    private int PLAYER = ChangeScene.player;
+    private int OPPONENT = (ChangeScene.player == 1) ? 2 : 1;
 
     // Tracking Opponent
     private void Awake()
@@ -165,7 +165,7 @@ public class HudController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        Debug.Log(ChangeScene.gamemode + " " + ChangeScene.player);
     }
 
     // Update is called once per frame
