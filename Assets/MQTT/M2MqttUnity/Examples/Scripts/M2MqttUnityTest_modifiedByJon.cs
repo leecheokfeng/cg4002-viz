@@ -58,7 +58,7 @@ namespace M2MqttUnity.Examples
 
         public void TestPublish()
         {
-            client.Publish("Player 2 Visibility", System.Text.Encoding.UTF8.GetBytes("True"), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
+            client.Publish("Player 1 Action", System.Text.Encoding.UTF8.GetBytes("cf_test_grenade"), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, false);
             Debug.Log("Test message published");
             AddUiMessage("Test message published.");
         }
@@ -213,7 +213,7 @@ namespace M2MqttUnity.Examples
                     Disconnect();
                 }
             }
-            TestPublish();
+            //TestPublish();
         }
 
         private void StoreMessage(string eventMsg)

@@ -105,7 +105,8 @@ public class HudController : MonoBehaviour
     private bool isWaitingForAnimation = false;
     //##//
 
-    // Action names
+    /*
+    // Action names (pre-integration)
     private string SHOOT = "shoot";
     private string RELOAD = "reload";
     private string SHIELD = "shield";
@@ -115,11 +116,25 @@ public class HudController : MonoBehaviour
     private static string PORTAL = "portal";
     private static string HAMMER = "hammer";
     private static string SPEAR = "spear";
+    */
 
-    // For now, we are always player 1, opponent is player 2
-    // Change these to view POV of each player's screen
-    private int PLAYER = 1;
-    private int OPPONENT = 2;
+    // Action names (post-integration with MQTT)
+    private static string SHIELD = "1";
+    private static string RELOAD = "2";
+    private static string WEB = "3";
+    private static string PORTAL = "4";
+    private static string PUNCH = "5";
+    private static string SPEAR = "6";
+    private static string HAMMER = "7";
+    private static string GRENADE = "8";
+    private static string EXIT = "9";
+    private static string SHOOT_MISS = "10";
+    private static string SHOOT_HIT = "11";
+
+    // Debug mode: Change these to view POV of each player's screen
+    // Play mode: We select our player in main menu
+    private int PLAYER = ChangeScene.player;
+    private int OPPONENT = (ChangeScene.player == 1) ? 2 : 1;
 
     // Tracking Opponent
     private void Awake()
@@ -150,7 +165,7 @@ public class HudController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        Debug.Log(ChangeScene.gamemode + " " + ChangeScene.player);
     }
 
     // Update is called once per frame
@@ -721,13 +736,19 @@ public class HudController : MonoBehaviour
         Debug.Log("displaying action...");
 
         // AR Effect for shoot
-        // Assume hit
-        if (action == SHOOT)
+        // Hit
+        if (action == SHOOT_HIT)
         {
             // generate muzzle flash
             GenerateMuzzleFlash();
             // generate sparks on opponent
             GenerateBulletSparks();
+        }
+        // Miss
+        if (action == SHOOT_MISS)
+        {
+            // generate muzzle flash
+            GenerateMuzzleFlash();
         }
 
         // AR Effect for reload
@@ -741,7 +762,7 @@ public class HudController : MonoBehaviour
     // Generate muzzle flash AR effect
     void GenerateMuzzleFlash()
     {
-        Instantiate(muzzleFlashPrefab, Camera.main.ViewportToWorldPoint(new Vector3(0.75f, 0.35f, 0.1f)), Quaternion.identity);
+        Instantiate(muzzleFlashPrefab, Camera.main.ViewportToWorldPoint(new Vector3(0.25f, 0.40f, 0.1f)), Quaternion.identity);
     }
 
     // Generate bullet sparks AR effect
@@ -764,6 +785,7 @@ public class HudController : MonoBehaviour
     }
 
     /*
+     * PRE-INTEGRATION
     - Game Engine calls this function to send action to visualiser
     - Handle what happens on visualiser for each action
     - This means opponent's actions should NOT be handled here since we do not 
@@ -806,7 +828,7 @@ public class HudController : MonoBehaviour
         else
         {
             DisplayAction(action);
-            return -1;
+            return isOpponentDetected ? 1 : 0;
         }
     }
 
@@ -840,11 +862,15 @@ public class HudController : MonoBehaviour
         {
             PLAYER = 2;
             OPPONENT = 1;
+
+            ChangeScene.player = 2;
         }
         else if (PLAYER == 2)
         {
             PLAYER = 1;
             OPPONENT= 2;
+
+            ChangeScene.player = 1;
         }
     }
 }
