@@ -24,6 +24,7 @@ public class GameEngine : MonoBehaviour
     // isOpponentDetected[1] = true -> p2 sees p1
     private bool[] isOpponentDetected = { false, false };
 
+    /*
     // Action names
     private string SHOOT = "shoot";
     private string RELOAD = "reload";
@@ -34,6 +35,20 @@ public class GameEngine : MonoBehaviour
     private string PORTAL = "portal";
     private string HAMMER = "hammer";
     private string SPEAR = "spear";
+    */
+
+    // Action names (post-integration with MQTT)
+    private static string SHIELD = "1";
+    private static string RELOAD = "2";
+    private static string WEB = "3";
+    private static string PORTAL = "4";
+    private static string PUNCH = "5";
+    private static string SPEAR = "6";
+    private static string HAMMER = "7";
+    private static string GRENADE = "8";
+    private static string EXIT = "9";
+    private static string SHOOT_MISS = "10";
+    private static string SHOOT_HIT = "11";
 
     // Dummy game state from eval server
     private string DUMMY_P1 = "{\"hp\":90, \"bullets\":5, \"grenades\":2, " +
@@ -140,10 +155,18 @@ public class GameEngine : MonoBehaviour
             SendGameStateToVisualiser();
         }
 
-        // Valid shoot
-        if (action == SHOOT)
+        // Valid shoot hit
+        if (action == SHOOT_HIT)
         {
-            HandleShoot(player);
+            HandleShoot(player, true);
+            SendActionToVisualiser(action, player);
+            SendGameStateToVisualiser();
+        }
+
+        // Valid shoot miss
+        if (action == SHOOT_MISS)
+        {
+            HandleShoot(player, false);
             SendActionToVisualiser(action, player);
             SendGameStateToVisualiser();
         }
@@ -200,9 +223,17 @@ public class GameEngine : MonoBehaviour
         }
 
         // Valid shoot
-        if (action == SHOOT)
+        if (action == SHOOT_HIT)
         {
-            HandleShoot(player);
+            HandleShoot(player, true);
+            SendActionToVisualiser(action, player);
+            SendGameStateToVisualiser();
+        }
+
+        // Valid shoot miss
+        if (action == SHOOT_MISS)
+        {
+            HandleShoot(player, false);
             SendActionToVisualiser(action, player);
             SendGameStateToVisualiser();
         }
@@ -308,15 +339,18 @@ public class GameEngine : MonoBehaviour
 
     // Assume shoot and hit
     // HandleShoot(1) means p1 shot p2 and hit
-    void HandleShoot(int player) 
+    void HandleShoot(int player, bool hit) 
     {
         int playerIndex = (player == 1) ? 0 : 1;
         int damagedPlayer = (player == 1) ? 2 : 1;
 
         ammoLeft[playerIndex] -= 1;
-        
+
         // If hit
-        TakeDamage(damagedPlayer, 10);
+        if (hit == true)
+        {
+            TakeDamage(damagedPlayer, 10);
+        }
     }
 
     // Damage a player
@@ -367,7 +401,7 @@ public class GameEngine : MonoBehaviour
         { return shieldsLeft[playerIndex] > 0 && shieldHp[playerIndex] == 0; }
         else if (action == RELOAD)
         { return ammoLeft[playerIndex] == 0; }
-        else if (action == SHOOT)
+        else if (action == SHOOT_HIT || action == SHOOT_MISS)
         { return ammoLeft[playerIndex] > 0; }
         else { return true; }  
     }
