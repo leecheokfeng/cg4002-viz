@@ -80,6 +80,12 @@ public class HudController : MonoBehaviour
     private bool isOpponentDetected = false;
     private Vector3 opponentPosition;
 
+    // Vuforia
+    public GameObject vuforiaTrackedObject;
+
+    // Logout Screen
+    public GameObject logoutOverlay;
+
     // Visualiser game state
     private int[] health = { 100, 100 };
     private int[] shieldHp = { 0, 0 };
@@ -166,6 +172,8 @@ public class HudController : MonoBehaviour
     void Start()
     {
         Debug.Log(ChangeScene.gamemode + " " + ChangeScene.player);
+
+        logoutOverlay.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -202,8 +210,11 @@ public class HudController : MonoBehaviour
             HandleOpponentShieldObject(OPPONENT);
         }
 
-        // Opponent detection
+        // Opponent detection (ARCore)
         DetectOpponent();
+
+        // Opponent detection (vuforia)
+        VuforiaDetection();
 
         // Handle grenade instantiation and physics
         HandleGrenadeObject();
@@ -246,8 +257,8 @@ public class HudController : MonoBehaviour
             // spear behaviour if opponent on screen
             if (isOpponentDetected)
             {
-                spearObject.transform.position = Vector3.MoveTowards(spearObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
-                float spearToOppDistance = Vector3.Distance(spearObject.transform.position, arTrackedImage.transform.position);
+                spearObject.transform.position = Vector3.MoveTowards(spearObject.transform.position, opponentPosition, MARVEL_VELOCITY);
+                float spearToOppDistance = Vector3.Distance(spearObject.transform.position, opponentPosition);
 
                 // If spear has reached opponent, destroy spearObject
                 if (spearToOppDistance < 0.01f)
@@ -298,8 +309,8 @@ public class HudController : MonoBehaviour
             // hammer behaviour if opponent on screen
             if (isOpponentDetected)
             {
-                hammerObject.transform.position = Vector3.MoveTowards(hammerObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
-                float hammerToOppDistance = Vector3.Distance(hammerObject.transform.position, arTrackedImage.transform.position);
+                hammerObject.transform.position = Vector3.MoveTowards(hammerObject.transform.position, opponentPosition, MARVEL_VELOCITY);
+                float hammerToOppDistance = Vector3.Distance(hammerObject.transform.position, opponentPosition);
 
                 // If hammer has reached opponent, destroy hammerObject
                 if (hammerToOppDistance < 0.01f)
@@ -349,8 +360,8 @@ public class HudController : MonoBehaviour
             // portal behaviour if opponent on screen
             if (isOpponentDetected)
             {
-                portalObject.transform.position = Vector3.MoveTowards(portalObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
-                float portalToOppDistance = Vector3.Distance(portalObject.transform.position, arTrackedImage.transform.position);
+                portalObject.transform.position = Vector3.MoveTowards(portalObject.transform.position, opponentPosition, MARVEL_VELOCITY);
+                float portalToOppDistance = Vector3.Distance(portalObject.transform.position, opponentPosition);
 
                 // If portal has reached opponent, destroy portalObject
                 if (portalToOppDistance < 0.01f)
@@ -400,8 +411,8 @@ public class HudController : MonoBehaviour
             // web behaviour if opponent on screen
             if (isOpponentDetected)
             {
-                webObject.transform.position = Vector3.MoveTowards(webObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
-                float webToOppDistance = Vector3.Distance(webObject.transform.position, arTrackedImage.transform.position);
+                webObject.transform.position = Vector3.MoveTowards(webObject.transform.position, opponentPosition, MARVEL_VELOCITY);
+                float webToOppDistance = Vector3.Distance(webObject.transform.position, opponentPosition);
 
                 // If web has reached opponent, destroy webObject
                 if (webToOppDistance < 0.01f)
@@ -452,8 +463,8 @@ public class HudController : MonoBehaviour
             // Punch behaviour if opponent on screen
             if (isOpponentDetected)
             {
-                punchObject.transform.position = Vector3.MoveTowards(punchObject.transform.position, arTrackedImage.transform.position, MARVEL_VELOCITY);
-                float punchToOppDistance = Vector3.Distance(punchObject.transform.position, arTrackedImage.transform.position);
+                punchObject.transform.position = Vector3.MoveTowards(punchObject.transform.position, opponentPosition, MARVEL_VELOCITY);
+                float punchToOppDistance = Vector3.Distance(punchObject.transform.position, opponentPosition);
 
                 // If punch has reached opponent, destroy punchObject
                 if (punchToOppDistance < 0.01f)
@@ -510,8 +521,8 @@ public class HudController : MonoBehaviour
             // Grenade behaviour if opponent on screen
             if (isOpponentDetected)
             {
-                grenadeObject.transform.position = Vector3.MoveTowards(grenadeObject.transform.position, arTrackedImage.transform.position, GRENADE_VELOCITY);
-                float grenadeToOppDistance = Vector3.Distance(grenadeObject.transform.position, arTrackedImage.transform.position);
+                grenadeObject.transform.position = Vector3.MoveTowards(grenadeObject.transform.position, opponentPosition, GRENADE_VELOCITY);
+                float grenadeToOppDistance = Vector3.Distance(grenadeObject.transform.position, opponentPosition);
 
                 // If grenade has reached opponent, destroy grenadeObject
                 if (grenadeToOppDistance < 0.01f)
@@ -823,6 +834,13 @@ public class HudController : MonoBehaviour
 
             return isOpponentDetected ? 1 : 0;
         }
+        // Logout action
+        else if (action == EXIT)
+        {
+            logoutOverlay.gameObject.SetActive(true);
+            
+            return isOpponentDetected ? 1 : 0;
+        }
 
         // Other actions (shoot, reload)
         else
@@ -872,5 +890,47 @@ public class HudController : MonoBehaviour
 
             ChangeScene.player = 1;
         }
+    }
+
+    // Closes logout screen, go back to game
+    public void CloseLogoutScreen()
+    {
+        logoutOverlay.SetActive(false);
+    }
+
+    // Opponent detection using vuforia (better range than ARCore)
+    void VuforiaDetection()
+    {
+        if (vuforiaTrackedObject != null)
+        {
+            opponentPosition = vuforiaTrackedObject.gameObject.transform.position;
+
+            if (vuforiaTrackedObject.gameObject.activeSelf == true)
+            {
+                DisplayDebugText("vuforia detected");
+                isOpponentDetected = true;
+
+                if (opponentShieldObject == null)
+                {
+                    // Instantiate at opponent position and (0, 180, 0) rotation.
+                    opponentShieldObject = Instantiate(opponentShieldPrefab, opponentPosition, Quaternion.AngleAxis(180, Vector3.up));
+                }
+            }
+            else
+            {
+                DisplayDebugText("vuforia not found");
+                isOpponentDetected = false;
+            }
+        }
+    }
+
+    public void VuforiaOnTargetFound()
+    {
+        vuforiaTrackedObject.gameObject.SetActive(true);
+    }
+
+    public void VuforiaOnTargetLost()
+    {
+        vuforiaTrackedObject.gameObject.SetActive(false);
     }
 }

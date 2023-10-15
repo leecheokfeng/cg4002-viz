@@ -172,6 +172,10 @@ public class GameEngine : MonoBehaviour
         }
 
         // Valid logout
+        if (action == EXIT)
+        {
+            SendActionToVisualiser(action, player);
+        }
     }
 
     // Handle all actions for player 2.
