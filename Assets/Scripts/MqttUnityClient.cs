@@ -14,6 +14,11 @@ public class MqttUnityClient : MonoBehaviour
     private MqttClient client;
     public string broker = "test.mosquitto.org";
 
+    // Set this in the inspector. If "false", the visibility reply will not be sent.
+    // This is meant for stereo mode, where one (right side) camera should not send
+    // the data so that we avoid double sending.
+    public bool sendReply = true;
+
     // Topics to subscribe/publish to
     private string gamestateTopic = "";
     private string actionTopic = "";
@@ -158,7 +163,13 @@ public class MqttUnityClient : MonoBehaviour
         {
             string action = msg_parts[1];
             bool can_see = TransmitActionToVisualiser(action);
-            SendVisibilityReply(can_see);
+
+            // Only true for LEFT camera (so no double sending in stereo mode)
+            if (sendReply == true)
+            {
+                SendVisibilityReply(can_see);
+            }
+            
         }
         // If topic contains gamestate
         else if (topic == gamestateTopic)

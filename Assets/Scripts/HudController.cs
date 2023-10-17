@@ -86,6 +86,9 @@ public class HudController : MonoBehaviour
     // Logout Screen
     public GameObject logoutOverlay;
 
+    // Black Screen surrounding cameras to cover background when logout screen is disabled
+    public GameObject blackScreen;
+
     // Visualiser game state
     private int[] health = { 100, 100 };
     private int[] shieldHp = { 0, 0 };
@@ -174,6 +177,7 @@ public class HudController : MonoBehaviour
         Debug.Log(ChangeScene.gamemode + " " + ChangeScene.player);
 
         logoutOverlay.gameObject.SetActive(false);
+        blackScreen.gameObject.SetActive(true);
     }
 
     // Update is called once per frame
@@ -838,7 +842,9 @@ public class HudController : MonoBehaviour
         else if (action == EXIT)
         {
             logoutOverlay.gameObject.SetActive(true);
-            
+
+            blackScreen.gameObject.SetActive(false);
+
             return isOpponentDetected ? 1 : 0;
         }
 
@@ -896,6 +902,8 @@ public class HudController : MonoBehaviour
     public void CloseLogoutScreen()
     {
         logoutOverlay.SetActive(false);
+
+        blackScreen.gameObject.SetActive(true);
     }
 
     // Opponent detection using vuforia (better range than ARCore)
