@@ -563,6 +563,8 @@ public class HudController : MonoBehaviour
             opponentShieldObject.SetActive(true);
             opponentShieldObject.transform.position = opponentPosition;
 
+            opponentShieldObject.transform.rotation = Camera.main.transform.rotation;
+
         }
         else
         {
@@ -794,7 +796,7 @@ public class HudController : MonoBehaviour
     {
         ammoText.color = Color.red;
         isWaitingForAnimation = true;
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(2);
         ammoText.color = Color.white;
         isWaitingForAnimation = false;
     }
