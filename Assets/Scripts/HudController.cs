@@ -563,7 +563,9 @@ public class HudController : MonoBehaviour
             opponentShieldObject.SetActive(true);
             opponentShieldObject.transform.position = opponentPosition;
 
+            // Set opponent shield's rotation to match camera's rotation, then rotate shield 180 around y-axis.
             opponentShieldObject.transform.rotation = Camera.main.transform.rotation;
+            opponentShieldObject.transform.Rotate(0, 180, 0);
 
         }
         else
