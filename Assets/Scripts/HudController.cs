@@ -264,6 +264,9 @@ public class HudController : MonoBehaviour
                 spearObject.transform.position = Vector3.MoveTowards(spearObject.transform.position, opponentPosition, MARVEL_VELOCITY);
                 float spearToOppDistance = Vector3.Distance(spearObject.transform.position, opponentPosition);
 
+                spearObject.transform.rotation = Camera.main.transform.rotation;
+                spearObject.transform.Rotate(90, 0, 0);
+
                 // If spear has reached opponent, destroy spearObject
                 if (spearToOppDistance < 0.01f)
                 {
@@ -280,6 +283,9 @@ public class HudController : MonoBehaviour
                 isWaitingForAnimation = false;
                 spearObject.transform.position = Vector3.MoveTowards(spearObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float spearToCameraDistance = Vector3.Distance(spearObject.transform.position, Camera.main.transform.position);
+
+                spearObject.transform.rotation = Camera.main.transform.rotation;
+                spearObject.transform.Rotate(90, 0, 0);
 
                 // If spear is >10m from us, destroy spearObject
                 if (spearToCameraDistance > 10f)
@@ -316,6 +322,9 @@ public class HudController : MonoBehaviour
                 hammerObject.transform.position = Vector3.MoveTowards(hammerObject.transform.position, opponentPosition, MARVEL_VELOCITY);
                 float hammerToOppDistance = Vector3.Distance(hammerObject.transform.position, opponentPosition);
 
+                hammerObject.transform.rotation = Camera.main.transform.rotation;
+                hammerObject.transform.Rotate(90, 0, 0);
+
                 // If hammer has reached opponent, destroy hammerObject
                 if (hammerToOppDistance < 0.01f)
                 {
@@ -332,6 +341,9 @@ public class HudController : MonoBehaviour
                 isWaitingForAnimation = false;
                 hammerObject.transform.position = Vector3.MoveTowards(hammerObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float hammerToCameraDistance = Vector3.Distance(hammerObject.transform.position, Camera.main.transform.position);
+
+                hammerObject.transform.rotation = Camera.main.transform.rotation;
+                hammerObject.transform.Rotate(90, 0, 0);
 
                 // If hammer is >10m from us, destroy hammerObject
                 if (hammerToCameraDistance > 10f)
@@ -367,6 +379,8 @@ public class HudController : MonoBehaviour
                 portalObject.transform.position = Vector3.MoveTowards(portalObject.transform.position, opponentPosition, MARVEL_VELOCITY);
                 float portalToOppDistance = Vector3.Distance(portalObject.transform.position, opponentPosition);
 
+                portalObject.transform.rotation = Camera.main.transform.rotation;
+
                 // If portal has reached opponent, destroy portalObject
                 if (portalToOppDistance < 0.01f)
                 {
@@ -383,6 +397,8 @@ public class HudController : MonoBehaviour
                 isWaitingForAnimation = false;
                 portalObject.transform.position = Vector3.MoveTowards(portalObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float portalToCameraDistance = Vector3.Distance(portalObject.transform.position, Camera.main.transform.position);
+
+                portalObject.transform.rotation = Camera.main.transform.rotation;
 
                 // If portal is >10m from us, destroy portalObject
                 if (portalToCameraDistance > 10f)
@@ -418,6 +434,9 @@ public class HudController : MonoBehaviour
                 webObject.transform.position = Vector3.MoveTowards(webObject.transform.position, opponentPosition, MARVEL_VELOCITY);
                 float webToOppDistance = Vector3.Distance(webObject.transform.position, opponentPosition);
 
+                webObject.transform.rotation = Camera.main.transform.rotation;
+                webObject.transform.Rotate(90, 0, 0);
+
                 // If web has reached opponent, destroy webObject
                 if (webToOppDistance < 0.01f)
                 {
@@ -434,6 +453,9 @@ public class HudController : MonoBehaviour
                 isWaitingForAnimation = false;
                 webObject.transform.position = Vector3.MoveTowards(webObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float webToCameraDistance = Vector3.Distance(webObject.transform.position, Camera.main.transform.position);
+
+                webObject.transform.rotation = Camera.main.transform.rotation;
+                webObject.transform.Rotate(90, 0, 0);
 
                 // If web is >10m from us, destroy webObject
                 if (webToCameraDistance > 10f)
@@ -470,6 +492,9 @@ public class HudController : MonoBehaviour
                 punchObject.transform.position = Vector3.MoveTowards(punchObject.transform.position, opponentPosition, MARVEL_VELOCITY);
                 float punchToOppDistance = Vector3.Distance(punchObject.transform.position, opponentPosition);
 
+                punchObject.transform.rotation = Camera.main.transform.rotation;
+                punchObject.transform.Rotate(90, 0, 0);
+
                 // If punch has reached opponent, destroy punchObject
                 if (punchToOppDistance < 0.01f)
                 {
@@ -486,6 +511,9 @@ public class HudController : MonoBehaviour
                 isWaitingForAnimation = false;
                 punchObject.transform.position = Vector3.MoveTowards(punchObject.transform.position, marvelMissTargetPos, 3 * MARVEL_VELOCITY);
                 float punchToCameraDistance = Vector3.Distance(punchObject.transform.position, Camera.main.transform.position);
+
+                punchObject.transform.rotation = Camera.main.transform.rotation;
+                punchObject.transform.Rotate(90, 0, 0);
 
                 // If punch is >10m from us, destroy punchObject
                 if (punchToCameraDistance > 10f)
