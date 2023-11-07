@@ -796,6 +796,15 @@ public class HudController : MonoBehaviour
         {
             // generate muzzle flash
             GenerateMuzzleFlash();
+
+            // show bullet sparks if opponent is on screen even though shoot_miss was sent
+            // contingency if vest doesn't detect shot hit, game engine uses viz detection instead
+            // since there is no test case where viz detects opponent but shot should miss (hopefully)?
+            if (isOpponentDetected == true)
+            {
+                // generate sparks on opponent
+                GenerateBulletSparks();
+            }
         }
 
         // AR Effect for reload
