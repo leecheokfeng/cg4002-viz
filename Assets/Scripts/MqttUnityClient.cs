@@ -12,7 +12,8 @@ using System.Linq;
 public class MqttUnityClient : MonoBehaviour
 {
     private MqttClient client;
-    public string broker = "test.mosquitto.org";
+    //public string broker = "test.mosquitto.org";
+    public string broker = "172.26.190.146";
 
     // Set this in the inspector. If "false", the visibility reply will not be sent.
     // This is meant for stereo mode, where one (right side) camera should not send
